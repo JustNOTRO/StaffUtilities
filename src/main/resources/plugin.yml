@@ -1,0 +1,11 @@
+name: StaffUtilities
+version: '${version}'
+main: me.notro.staffutilities.StaffUtilities
+api-version: '1.20'
+authors: [ Notro ]
+description: An helpful Staff Tools for every Minecraft server.
+
+commands:
+  staffmode:
+    aliases: sm
+    description: Toggle staff mode command.

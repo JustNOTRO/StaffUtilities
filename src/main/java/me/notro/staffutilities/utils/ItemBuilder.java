@@ -1,5 +1,6 @@
 package me.notro.staffutilities.utils;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -72,7 +73,7 @@ public final class ItemBuilder {
 
     public ItemBuilder setDisplayName(String displayName) {
         ItemMeta meta = getItemMeta();
-        meta.setDisplayName(Message.fixColor(displayName));
+        meta.displayName(Message.fixColor(displayName));
         setItemMeta(meta);
         return this;
     }
@@ -84,16 +85,16 @@ public final class ItemBuilder {
 
     public ItemBuilder setLore(String... lore) {
         ItemMeta meta = getItemMeta();
-        meta.setLore(Arrays.stream(lore).map(Message::fixColor).collect(Collectors.toList()));
+        meta.lore(Arrays.stream(lore).map(Message::fixColor).collect(Collectors.toList()));
         setItemMeta(meta);
         return this;
     }
 
-    public ItemBuilder setLore(String lore) {
-        List<String> loreList = new ArrayList<>();
+    public ItemBuilder setLore(Component lore) {
+        List<Component> loreList = new ArrayList<>();
         loreList.add(lore);
         ItemMeta meta = getItemMeta();
-        meta.setLore(loreList);
+        meta.lore(loreList);
         setItemMeta(meta);
         return this;
     }

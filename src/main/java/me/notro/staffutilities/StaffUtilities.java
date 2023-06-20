@@ -1,20 +1,24 @@
 package me.notro.staffutilities;
 
 import lombok.Getter;
-import lombok.Setter;
 import me.notro.staffutilities.commands.StaffModeCommand;
 import me.notro.staffutilities.listeners.PlayerInteractListener;
+import me.notro.staffutilities.managers.StaffModeManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class StaffUtilities extends JavaPlugin {
 
     @Getter
-    @Setter
     private static StaffUtilities instance;
+
+    @Getter
+    private StaffModeManager staffModeManager;
 
     @Override
     public void onEnable() {
-        setInstance(this);
+        instance = this;
+
+        staffModeManager = new StaffModeManager();
         getConfig().options().copyDefaults();
         saveDefaultConfig();
 

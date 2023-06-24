@@ -1,8 +1,11 @@
 package me.notro.staffutilities;
 
 import lombok.Getter;
+import me.notro.staffutilities.commands.StaffChatCommand;
 import me.notro.staffutilities.commands.StaffModeCommand;
+import me.notro.staffutilities.listeners.InventoryClickListener;
 import me.notro.staffutilities.listeners.PlayerInteractListener;
+import me.notro.staffutilities.managers.GUIManager;
 import me.notro.staffutilities.managers.StaffModeManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,11 +17,15 @@ public final class StaffUtilities extends JavaPlugin {
     @Getter
     private StaffModeManager staffModeManager;
 
+    @Getter
+    private GUIManager guiManager;
+
     @Override
     public void onEnable() {
         instance = this;
-
         staffModeManager = new StaffModeManager();
+        guiManager = new GUIManager();
+
         getConfig().options().copyDefaults();
         saveDefaultConfig();
 
@@ -26,9 +33,11 @@ public final class StaffUtilities extends JavaPlugin {
 
         // Commands
         getCommand("staffmode").setExecutor(new StaffModeCommand());
+        getCommand("staffchat").setExecutor(new StaffChatCommand());
 
         //Listeners
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
     }
 
     @Override

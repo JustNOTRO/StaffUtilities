@@ -9,3 +9,7 @@ commands:
   staffmode:
     aliases: sm
     description: Toggle staff mode command.
+
+  staffchat:
+    aliases: sc
+    description: Enable/Disable staff chat for discussion with the other staff.

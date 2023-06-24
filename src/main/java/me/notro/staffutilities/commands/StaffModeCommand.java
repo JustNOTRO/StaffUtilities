@@ -4,7 +4,6 @@ import me.notro.staffutilities.StaffUtilities;
 import me.notro.staffutilities.managers.StaffModeManager;
 import me.notro.staffutilities.utils.Message;
 import me.notro.staffutilities.utils.Sounds;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class StaffModeCommand implements CommandExecutor {
-
 
     private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
 

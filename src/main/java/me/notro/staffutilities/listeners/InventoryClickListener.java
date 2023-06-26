@@ -4,6 +4,7 @@ import me.notro.staffutilities.StaffUtilities;
 import me.notro.staffutilities.managers.GUIManager;
 import me.notro.staffutilities.utils.ItemBuilder;
 import me.notro.staffutilities.utils.Message;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -39,14 +40,14 @@ public class InventoryClickListener implements Listener {
             return;
         }
 
-        guiManager.createMenu(player, 9, Message.fixColor("&cFreeze &6" + whoToFreeze.getName()));
+        Component isFrozen = freezedPlayers.contains(whoToFreeze.getUniqueId().toString()) ? Message.fixColor("&cUnfreeze &6" + whoToFreeze.getName()) : Message.fixColor("&cFreeze &6" + whoToFreeze.getName());
+
+        guiManager.createMenu(player, 9, isFrozen);
         guiManager.setMenuItem(0, new ItemBuilder(Material.GREEN_WOOL).setDisplayName("&aConfirm"));
         guiManager.setMenuItem(8, new ItemBuilder(Material.RED_WOOL).setDisplayName("&cDeny"));
-
         player.openInventory(guiManager.getInventory());
 
-        String isFrozen = freezedPlayers.contains(whoToFreeze.getUniqueId().toString()) ? Message.fixText("&cUnfreeze &6" + whoToFreeze.getName()) : Message.fixText("&cFreeze &6" + whoToFreeze.getName());
-        if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText("&cFreeze &6" + whoToFreeze.getName()))) return;
+        if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText(isFrozen.toString()))) return;
     }
 
     @EventHandler

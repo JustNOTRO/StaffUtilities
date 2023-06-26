@@ -8,6 +8,7 @@ import me.notro.staffutilities.listeners.PlayerInteractListener;
 import me.notro.staffutilities.listeners.PlayerMoveListener;
 import me.notro.staffutilities.managers.GUIManager;
 import me.notro.staffutilities.managers.StaffModeManager;
+import me.notro.staffutilities.managers.VanishManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class StaffUtilities extends JavaPlugin {

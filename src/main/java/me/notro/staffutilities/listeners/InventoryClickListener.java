@@ -80,4 +80,27 @@ public class InventoryClickListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onPlayerTeleport(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        ItemStack slot = event.getInventory().getItem(event.getSlot());
+
+        if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText("&eTeleport"))) return;
+        if (slot == null) return;
+        if (slot.getType() != Material.PLAYER_HEAD) return;
+
+        Player whoToTeleport = event.getWhoClicked().getServer().getPlayerExact(LegacyComponentSerializer.legacySection().serialize(slot.hasItemMeta() ? slot.getItemMeta().displayName() : slot.displayName()));
+
+        if (whoToTeleport == null) {
+            player.sendMessage(Message.NO_PLAYER_EXISTENCE);
+            return;
+        }
+
+        guiManager.createMenu(player, 36, Message.fixColor("&eTeleport"));
+
+        player.teleport(whoToTeleport.getLocation());
+        player.closeInventory();
+        player.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully teleported to &6" + whoToTeleport.getName() + "&7.")));
+    }
 }

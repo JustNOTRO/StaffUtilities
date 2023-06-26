@@ -19,9 +19,10 @@ public class PlayerInteractListener implements Listener {
 
     private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
     private final GUIManager guiManager = StaffUtilities.getInstance().getGuiManager();
+    private final VanishManager vanishManager = StaffUtilities.getInstance().getVanishManager();
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerFlight(PlayerInteractEvent event) {
         if (!staffModeManager.isInStaffMode(event.getPlayer())) return;
         if (!event.hasItem()) return;
         if (event.getItem() == null) return;
@@ -34,7 +35,7 @@ public class PlayerInteractListener implements Listener {
         if (!itemName.equals(Message.fixColor("&6Fly"))) return;
         if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
-        Component isEnabled = event.getPlayer().getAllowFlight() ? Message.fixColor("&cFlight is disabled&7.") : Message.fixColor("&aFlight is enabled&7.");
+        Component isEnabled = event.getPlayer().getAllowFlight() ? Message.fixColor("&7Flight is &cdisabled&7.") : Message.fixColor("&7Flight is &aenabled&7.");
 
         event.getPlayer().setAllowFlight(!event.getPlayer().getAllowFlight());
         event.getPlayer().sendMessage(Message.getPrefix().append(isEnabled));
@@ -42,6 +43,7 @@ public class PlayerInteractListener implements Listener {
 
     @EventHandler
     public void onPlayerFreeze(PlayerInteractEvent event) {
+        if (!staffModeManager.isInStaffMode(event.getPlayer())) return;
         if (!event.hasItem()) return;
         if (event.getItem() == null) return;
         if (!event.getItem().hasItemMeta()) return;
@@ -68,5 +70,32 @@ public class PlayerInteractListener implements Listener {
         }
 
         event.getPlayer().openInventory(guiManager.getInventory());
+    }
+
+    @EventHandler
+    public void onPlayerVanish(PlayerInteractEvent event) {
+        if (!staffModeManager.isInStaffMode(event.getPlayer())) return;
+        if (!event.hasItem()) return;
+        if (event.getItem() == null) return;
+        if (!event.getItem().hasItemMeta()) return;
+        if (event.getItem().getItemMeta() == null) return;
+        if (!event.getItem().getItemMeta().hasDisplayName()) return;
+
+        Component itemName = event.getItem().getItemMeta().displayName();
+
+        if (!itemName.equals(Message.fixColor("&cVanish"))) return;
+        if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+
+        if (!vanishManager.isVanished(event.getPlayer())) {
+            vanishManager.joinVanish(event.getPlayer());
+            return;
+        }
+
+        vanishManager.quitVanish(event.getPlayer());
+
+        Bukkit.getOnlinePlayers()
+                .stream()
+                .filter(vanishManager::hasBypass)
+                .forEach(players -> players.showPlayer(StaffUtilities.getInstance(), event.getPlayer()));
     }
 }

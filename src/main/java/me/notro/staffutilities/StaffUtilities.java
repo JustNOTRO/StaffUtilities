@@ -5,6 +5,7 @@ import me.notro.staffutilities.commands.StaffChatCommand;
 import me.notro.staffutilities.commands.StaffModeCommand;
 import me.notro.staffutilities.listeners.InventoryClickListener;
 import me.notro.staffutilities.listeners.PlayerInteractListener;
+import me.notro.staffutilities.listeners.PlayerMoveListener;
 import me.notro.staffutilities.managers.GUIManager;
 import me.notro.staffutilities.managers.StaffModeManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,11 +21,15 @@ public final class StaffUtilities extends JavaPlugin {
     @Getter
     private GUIManager guiManager;
 
+    @Getter
+    private VanishManager vanishManager;
+
     @Override
     public void onEnable() {
         instance = this;
         staffModeManager = new StaffModeManager();
         guiManager = new GUIManager();
+        vanishManager = new VanishManager();
 
         getConfig().options().copyDefaults();
         saveDefaultConfig();
@@ -38,6 +43,7 @@ public final class StaffUtilities extends JavaPlugin {
         //Listeners
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerMoveListener(), this);
     }
 
     @Override

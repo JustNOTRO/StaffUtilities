@@ -23,7 +23,9 @@ public class StaffModeManager {
     public void joinStaffMode(@NonNull Player player) {
         staffModeList.add(player.getUniqueId().toString());
         createStaffTool(player, Material.FEATHER, "&6Fly", 7);
+        createStaffTool(player, Material.BLAZE_ROD, "&eTeleport", 6);
         createStaffTool(player, Material.DIAMOND_HOE, "&bFreeze", 2);
+        createStaffTool(player, Material.ARROW, "&cVanish", 1);
         configurationSection.set("players", staffModeList);
         StaffUtilities.getInstance().saveConfig();
     }
@@ -31,7 +33,7 @@ public class StaffModeManager {
     public void quitStaffMode(@NonNull Player player) {
         staffModeList.remove(player.getUniqueId().toString());
         player.getInventory().clear();
-        configurationSection.set("players", null);
+        configurationSection.set("players", staffModeList);
         StaffUtilities.getInstance().saveConfig();
     }
 

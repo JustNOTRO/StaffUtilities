@@ -8,3 +8,7 @@ freeze:
 
 vanish:
   vanished-players:
+
+punishments:
+  ban:
+    banned-players:

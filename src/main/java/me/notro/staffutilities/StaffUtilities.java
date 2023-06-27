@@ -3,9 +3,8 @@ package me.notro.staffutilities;
 import lombok.Getter;
 import me.notro.staffutilities.commands.StaffChatCommand;
 import me.notro.staffutilities.commands.StaffModeCommand;
-import me.notro.staffutilities.listeners.InventoryClickListener;
-import me.notro.staffutilities.listeners.PlayerInteractListener;
-import me.notro.staffutilities.listeners.PlayerMoveListener;
+import me.notro.staffutilities.listeners.*;
+import me.notro.staffutilities.managers.BanManager;
 import me.notro.staffutilities.managers.GUIManager;
 import me.notro.staffutilities.managers.StaffModeManager;
 import me.notro.staffutilities.managers.VanishManager;
@@ -25,12 +24,16 @@ public final class StaffUtilities extends JavaPlugin {
     @Getter
     private VanishManager vanishManager;
 
+    @Getter
+    private BanManager banManager;
+
     @Override
     public void onEnable() {
         instance = this;
         staffModeManager = new StaffModeManager();
         guiManager = new GUIManager();
         vanishManager = new VanishManager();
+        banManager = new BanManager();
 
         getConfig().options().copyDefaults();
         saveDefaultConfig();
@@ -45,6 +48,7 @@ public final class StaffUtilities extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
     }
 
     @Override

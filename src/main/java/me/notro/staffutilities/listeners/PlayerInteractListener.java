@@ -89,10 +89,12 @@ public class PlayerInteractListener implements Listener {
 
         if (!vanishManager.isVanished(event.getPlayer())) {
             vanishManager.joinVanish(event.getPlayer());
+            Bukkit.broadcast(Message.fixColor("&e" + event.getPlayer().getName() + " left the game"));
             return;
         }
 
         vanishManager.quitVanish(event.getPlayer());
+        Bukkit.broadcast(Message.fixColor("&e" + event.getPlayer().getName() + " joined the game"));
 
         Bukkit.getOnlinePlayers()
                 .stream()
@@ -109,11 +111,42 @@ public class PlayerInteractListener implements Listener {
         if (event.getItem().getItemMeta() == null) return;
         if (!event.getItem().getItemMeta().hasDisplayName()) return;
 
-        guiManager.createMenu(event.getPlayer(), 36, Message.fixColor("&eTeleport"));
         Component itemName = event.getItem().getItemMeta().displayName();
+        guiManager.createMenu(event.getPlayer(), 36, Message.fixColor("&eTeleport"));
 
         if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         if (!itemName.equals(Message.fixColor("&eTeleport"))) return;
+
+        ItemBuilder itemBuilder = new ItemBuilder(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) itemBuilder.getItemMeta();
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (skullMeta.hasOwner()) return;
+
+            skullMeta.setOwningPlayer(onlinePlayer);
+            skullMeta.displayName(onlinePlayer.displayName());
+
+            itemBuilder.setItemMeta(skullMeta);
+            guiManager.addMenuItem(itemBuilder);
+        }
+
+        event.getPlayer().openInventory(guiManager.getInventory());
+    }
+
+    @EventHandler
+    public void onPlayerPunish(PlayerInteractEvent event) {
+        if (!staffModeManager.isInStaffMode(event.getPlayer())) return;
+        if (!event.hasItem()) return;
+        if (event.getItem() == null) return;
+        if (!event.getItem().hasItemMeta()) return;
+        if (event.getItem().getItemMeta() == null) return;
+        if (!event.getItem().getItemMeta().hasDisplayName()) return;
+
+        Component itemName = event.getItem().getItemMeta().displayName();
+        guiManager.createMenu(event.getPlayer(), 36, Message.fixColor("&4Punish"));
+
+        if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if (!itemName.equals(Message.fixColor("&4Punish"))) return;
 
         ItemBuilder itemBuilder = new ItemBuilder(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) itemBuilder.getItemMeta();

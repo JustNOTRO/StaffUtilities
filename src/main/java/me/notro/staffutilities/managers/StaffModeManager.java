@@ -26,6 +26,7 @@ public class StaffModeManager {
         createStaffTool(player, Material.BLAZE_ROD, "&eTeleport", 6);
         createStaffTool(player, Material.DIAMOND_HOE, "&bFreeze", 2);
         createStaffTool(player, Material.ARROW, "&cVanish", 1);
+        createStaffTool(player, Material.STONE_AXE, "&4Punish", 0);
         configurationSection.set("players", staffModeList);
         StaffUtilities.getInstance().saveConfig();
     }

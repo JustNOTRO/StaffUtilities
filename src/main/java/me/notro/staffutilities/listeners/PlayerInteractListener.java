@@ -61,8 +61,6 @@ public class PlayerInteractListener implements Listener {
         SkullMeta skullMeta = (SkullMeta) itemBuilder.getItemMeta();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (skullMeta.hasOwner()) return;
-
             skullMeta.setOwningPlayer(onlinePlayer);
             skullMeta.displayName(onlinePlayer.displayName());
 
@@ -121,8 +119,6 @@ public class PlayerInteractListener implements Listener {
         SkullMeta skullMeta = (SkullMeta) itemBuilder.getItemMeta();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (skullMeta.hasOwner()) return;
-
             skullMeta.setOwningPlayer(onlinePlayer);
             skullMeta.displayName(onlinePlayer.displayName());
 
@@ -152,8 +148,6 @@ public class PlayerInteractListener implements Listener {
         SkullMeta skullMeta = (SkullMeta) itemBuilder.getItemMeta();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (skullMeta.hasOwner()) return;
-
             skullMeta.setOwningPlayer(onlinePlayer);
             skullMeta.displayName(onlinePlayer.displayName());
 

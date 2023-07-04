@@ -17,7 +17,7 @@ public class VanishManager {
 
     public VanishManager() {
         this.plugin = StaffUtilities.getInstance();
-        this.vanishSection = StaffUtilities.getInstance().getConfig().getConfigurationSection("vanish");
+        this.vanishSection = plugin.getConfig().getConfigurationSection("vanish");
         this.vanishedPlayers = vanishSection.getStringList("vanished-players");
     }
 

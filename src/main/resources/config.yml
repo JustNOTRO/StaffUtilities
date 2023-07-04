@@ -12,3 +12,6 @@ vanish:
 punishments:
   ban:
     banned-players:
+
+report-system:
+  reported-players:

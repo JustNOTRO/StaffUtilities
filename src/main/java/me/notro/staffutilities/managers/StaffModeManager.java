@@ -2,40 +2,39 @@ package me.notro.staffutilities.managers;
 
 import lombok.NonNull;
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.utils.ItemBuilder;
+import me.notro.staffutilities.utils.Message;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
 public class StaffModeManager {
 
+    private final StaffUtilities plugin;
     private final ConfigurationSection configurationSection;
     private final List<String> staffModeList;
 
     public StaffModeManager() {
-        this.configurationSection = StaffUtilities.getInstance().getConfig().getConfigurationSection("staff-mode");
+        this.plugin = StaffUtilities.getInstance();
+        this.configurationSection = plugin.getConfig().getConfigurationSection("staff-mode");
         this.staffModeList = configurationSection.getStringList("players");
     }
 
     public void joinStaffMode(@NonNull Player player) {
         staffModeList.add(player.getUniqueId().toString());
-        createStaffTool(player, Material.FEATHER, "&6Fly", 7);
-        createStaffTool(player, Material.BLAZE_ROD, "&eTeleport", 6);
-        createStaffTool(player, Material.DIAMOND_HOE, "&bFreeze", 2);
-        createStaffTool(player, Material.ARROW, "&cVanish", 1);
-        createStaffTool(player, Material.STONE_AXE, "&4Punish", 0);
         configurationSection.set("players", staffModeList);
-        StaffUtilities.getInstance().saveConfig();
+        loadStaffTools(player);
+        plugin.saveConfig();
     }
 
     public void quitStaffMode(@NonNull Player player) {
         staffModeList.remove(player.getUniqueId().toString());
-        player.getInventory().clear();
         configurationSection.set("players", staffModeList);
-        StaffUtilities.getInstance().saveConfig();
+        player.getInventory().clear();
+        plugin.saveConfig();
     }
 
     public boolean isInStaffMode(@NonNull Player player) {
@@ -43,18 +42,21 @@ public class StaffModeManager {
     }
 
     private void createStaffTool(@NonNull Player staff, @NonNull Material material, @NonNull String displayName, int index) {
-        ItemBuilder itemBuilder = new ItemBuilder(material);
-        itemBuilder.setDisplayName(displayName);
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta itemMeta = itemStack.getItemMeta();
 
-        staff.getInventory().setItem(index, itemBuilder.build());
+        itemMeta.displayName(Message.fixColor(displayName));
+        itemStack.setItemMeta(itemMeta);
+
+        staff.getInventory().setItem(index, itemStack);
     }
 
-    private void restoreItems(@NonNull Player player) {
-        ItemStack[] itemRestorer = player.getInventory().getContents();
-
-        for (ItemStack content : itemRestorer) {
-            if (content == null) return;
-            player.getInventory().addItem(content);
-        }
+    private void loadStaffTools(@NonNull Player staff) {
+        createStaffTool(staff, Material.FEATHER, "&6Fly", 7);
+        createStaffTool(staff, Material.BLAZE_ROD, "&eTeleport", 6);
+        createStaffTool(staff, Material.PAPER, "&9Reports", 3);
+        createStaffTool(staff, Material.DIAMOND_HOE, "&bFreeze", 2);
+        createStaffTool(staff, Material.ARROW, "&cVanish", 1);
+        createStaffTool(staff, Material.STONE_AXE, "&4Punish", 0);
     }
 }

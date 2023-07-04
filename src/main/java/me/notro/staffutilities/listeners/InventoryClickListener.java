@@ -1,27 +1,25 @@
 package me.notro.staffutilities.listeners;
 
+import me.notro.staffutilities.objects.Punishment;
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.BanManager;
+import me.notro.staffutilities.managers.PunishmentManager;
+import me.notro.staffutilities.managers.FreezeManager;
 import me.notro.staffutilities.managers.GUIManager;
-import me.notro.staffutilities.utils.ItemBuilder;
 import me.notro.staffutilities.utils.Message;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
 
 public class InventoryClickListener implements Listener {
 
     private final GUIManager guiManager = StaffUtilities.getInstance().getGuiManager();
-    private final BanManager banManager = StaffUtilities.getInstance().getBanManager();
-    private final ConfigurationSection freezeSection = StaffUtilities.getInstance().getConfig().getConfigurationSection("freeze");
-    private final List<String> freezedPlayers = freezeSection.getStringList("freezed-players");
+    private final PunishmentManager punishmentManager = StaffUtilities.getInstance().getPunishmentManager();
+    private final FreezeManager freezeManager = StaffUtilities.getInstance().getFreezeManager();
     private Player whoToFreeze;
     private Player whoToPunish;
 
@@ -42,8 +40,8 @@ public class InventoryClickListener implements Listener {
         }
 
         guiManager.createMenu(player, 9, Message.fixColor("&bFreeze &6" + whoToFreeze.getName()));
-        guiManager.setMenuItem(0, new ItemBuilder(Material.GREEN_WOOL).setDisplayName("&aConfirm"));
-        guiManager.setMenuItem(8, new ItemBuilder(Material.RED_WOOL).setDisplayName("&cDeny"));
+        guiManager.setMenuItem(0, new ItemStack(Material.GREEN_WOOL), "&aConfirm");
+        guiManager.setMenuItem(8, new ItemStack(Material.RED_WOOL), "&cDeny");
 
         if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText("&bFreeze &6" + whoToFreeze.getName()))) player.openInventory(guiManager.getInventory());
     }
@@ -58,19 +56,19 @@ public class InventoryClickListener implements Listener {
 
         switch (secondSlot.getType()) {
             case GREEN_WOOL -> {
-                if (!freezedPlayers.contains(whoToFreeze.getUniqueId().toString())) {
-                    freezedPlayers.add(whoToFreeze.getUniqueId().toString());
-                    freezeSection.set("freezed-players", freezedPlayers);
-                    player.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully freezed &6" + whoToFreeze.getName() + "&7.")));
-                    StaffUtilities.getInstance().saveConfig();
+                if (freezeManager.hasBypass(whoToFreeze)) {
+                    player.sendMessage(Message.getPrefix().append(Message.fixColor("&6" + whoToFreeze.getName() + " &ccannot be freezed silly&7!")));
                     player.closeInventory();
                     return;
                 }
 
-                freezedPlayers.remove(whoToFreeze.getUniqueId().toString());
-                freezeSection.set("freezed-players", freezedPlayers);
-                player.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully unfreezed &6" + whoToFreeze.getName() + "&7.")));
-                StaffUtilities.getInstance().saveConfig();
+                if (!freezeManager.isFrozen(whoToFreeze)) {
+                    freezeManager.executeFreeze(whoToFreeze);
+                    player.closeInventory();
+                    return;
+                }
+
+                freezeManager.executeUnfreeze(whoToFreeze);
                 player.closeInventory();
             }
 
@@ -88,6 +86,7 @@ public class InventoryClickListener implements Listener {
 
         if (slot == null) return;
         if (slot.getType() != Material.PLAYER_HEAD) return;
+        if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText("&4Punish"))) return;
 
         whoToPunish = event.getWhoClicked().getServer().getPlayerExact(LegacyComponentSerializer.legacySection().serialize(slot.hasItemMeta() ? slot.getItemMeta().displayName() : slot.displayName()));
 
@@ -97,8 +96,8 @@ public class InventoryClickListener implements Listener {
         }
 
         guiManager.createMenu(player, 9, Message.fixColor("&4Ban " + whoToPunish.getName()));
-        guiManager.setMenuItem(0, new ItemBuilder(Material.LIME_CONCRETE).setDisplayName("&aConfirm"));
-        guiManager.setMenuItem(8, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("&cDeny"));
+        guiManager.setMenuItem(0, new ItemStack(Material.LIME_CONCRETE), "&aConfirm");
+        guiManager.setMenuItem(8, new ItemStack(Material.RED_CONCRETE), "&cDeny");
 
         if (!event.getView().getOriginalTitle().equalsIgnoreCase(Message.fixText("&4Ban " + whoToPunish.getName()))) player.openInventory(guiManager.getInventory());
     }
@@ -113,21 +112,22 @@ public class InventoryClickListener implements Listener {
 
         switch (slot.getType()) {
             case LIME_CONCRETE -> {
-                if (banManager.hasBypass(whoToPunish)) {
+                Punishment punishment = new Punishment(player.getName(), whoToPunish.getUniqueId());
+
+                if (punishmentManager.hasBypass(whoToPunish)) {
                     player.closeInventory();
                     player.sendMessage(Message.getPrefix().append(Message.fixColor("&6" + whoToPunish.getName() + " &ccannot be punished silly&7!")));
                     return;
                 }
 
-                if (banManager.isBanned(whoToPunish)) {
+                if (punishmentManager.isBanned(whoToPunish)) {
                     player.closeInventory();
                     player.sendMessage(Message.getPrefix().append(Message.fixColor("&6" + whoToPunish.getName() + " &cis already banned&7.")));
                     return;
                 }
 
-                banManager.executeBan(whoToPunish, null);
                 player.closeInventory();
-                player.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully banned &6" + whoToPunish.getName() + "&7.")));
+                punishmentManager.executeBan(player, whoToPunish, punishment.getReason());
             }
 
             case RED_CONCRETE -> {

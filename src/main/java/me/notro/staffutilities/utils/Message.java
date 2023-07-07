@@ -17,10 +17,6 @@ public class Message {
         return LegacyComponentSerializer.legacy('&').deserialize(message);
     }
 
-    public static String fixText(@NonNull String message) {
-        return ChatColor.translateAlternateColorCodes('&', message);
-    }
-
     @Getter
     private static final Component prefix = fixColor("&8[&6Staff Mode&8] &7>>> ");
 }

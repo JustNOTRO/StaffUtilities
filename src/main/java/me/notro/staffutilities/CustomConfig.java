@@ -48,7 +48,7 @@ public class CustomConfig {
     }
 
     public String getString(String path) {
-        if (!get().isSet(path)) return Message.fixText("&cError path not found&7.");
+        if (!get().isSet(path)) return Message.fixColor("&cError path not found&7.").examinableName();
 
         return get().getString(path);
     }

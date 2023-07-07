@@ -1,14 +1,15 @@
 package me.notro.staffutilities;
 
 import lombok.Getter;
-import me.notro.staffutilities.commands.ReportCommand;
-import me.notro.staffutilities.commands.StaffChatCommand;
-import me.notro.staffutilities.commands.StaffModeCommand;
-import me.notro.staffutilities.commands.StaffReportsCommand;
+import me.notro.staffutilities.commands.*;
 import me.notro.staffutilities.listeners.*;
 import me.notro.staffutilities.managers.*;
+import me.notro.staffutilities.objects.Punishment;
 import me.notro.staffutilities.objects.Report;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 public final class StaffUtilities extends JavaPlugin {
 
@@ -25,10 +26,10 @@ public final class StaffUtilities extends JavaPlugin {
     private VanishManager vanishManager;
 
     @Getter
-    private PunishmentManager punishmentManager;
+    private FreezeManager freezeManager;
 
     @Getter
-    private FreezeManager freezeManager;
+    private PunishmentManager punishmentManager;
 
     @Getter
     private ReportManager reportManager;
@@ -37,12 +38,18 @@ public final class StaffUtilities extends JavaPlugin {
     private Report report;
 
     @Getter
+    private Punishment punishment;
+
+    @Getter
+    private HashMap<UUID, Punishment> reasonProvider;
+
+    @Getter
     private CustomConfig staffUtilsConfig;
 
     @Override
     public void onEnable() {
         instance = this;
-        staffUtilsConfig = new CustomConfig(instance, "staff");
+        staffUtilsConfig = new CustomConfig(instance, "staffutils");
 
         loadManagers();
         loadObjects();
@@ -54,14 +61,18 @@ public final class StaffUtilities extends JavaPlugin {
         getCommand("staffmode").setExecutor(new StaffModeCommand());
         getCommand("staffchat").setExecutor(new StaffChatCommand());
         getCommand("report").setExecutor(new ReportCommand());
-        getCommand("reports").setExecutor(new StaffReportsCommand());
+        getCommand("reports").setExecutor(new ReportsCommand());
+        getCommand("punish").setExecutor(new PunishCommand());
 
-        getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
-        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
         getServer().getPluginManager().registerEvents(new AsyncChatListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerReportListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerFreezeListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerFlightListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerPunishListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerVanishListener(), this);
         }
 
     @Override
@@ -73,12 +84,14 @@ public final class StaffUtilities extends JavaPlugin {
         staffModeManager = new StaffModeManager();
         guiManager = new GUIManager();
         vanishManager = new VanishManager();
-        punishmentManager = new PunishmentManager();
         freezeManager = new FreezeManager();
+        punishmentManager = new PunishmentManager();
         reportManager = new ReportManager();
     }
 
     private void loadObjects() {
         report = new Report();
+        reasonProvider = new HashMap<>();
+        punishment = new Punishment();
     }
 }

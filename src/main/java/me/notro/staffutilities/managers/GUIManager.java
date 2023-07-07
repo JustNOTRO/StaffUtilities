@@ -31,7 +31,7 @@ public class GUIManager {
         inventory.setItem(index, itemStack);
     }
 
-    public void clearMenu(@NonNull Inventory inventory) {
-        inventory.clear();
+    public boolean isEmpty() {
+        return inventory.isEmpty();
     }
 }

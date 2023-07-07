@@ -2,20 +2,16 @@ package me.notro.staffutilities.objects;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.kyori.adventure.text.Component;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
-import java.util.UUID;
-
-@RequiredArgsConstructor
 @Getter
+@Setter
 @NonNull
 public class Punishment {
 
-    private final String requester;
-    private final UUID target;
-
-    @Setter
+    private Player requester;
+    private OfflinePlayer target;
     private String reason;
 }

@@ -1,6 +1,8 @@
 package me.notro.staffutilities.listeners;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.notro.staffutilities.StaffUtilities;
+import me.notro.staffutilities.managers.PunishmentManager;
 import me.notro.staffutilities.objects.Punishment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,13 +13,17 @@ import java.util.UUID;
 
 public class AsyncChatListener implements Listener {
 
-    private final HashMap<UUID, Punishment> reasonProvider = new HashMap<>();
+    private final Punishment punishment = StaffUtilities.getInstance().getPunishment();
+    private final PunishmentManager punishmentManager = StaffUtilities.getInstance().getPunishmentManager();
+    private final HashMap<UUID, Punishment> reasonProvider = StaffUtilities.getInstance().getReasonProvider();
+
     @EventHandler
     public void onPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
-        Punishment punishment = new Punishment(player.getName(), player.getUniqueId());
 
-        punishment.setReason(event.message().examinableName());
-        reasonProvider.put(player.getUniqueId(), punishment);
+        if (!reasonProvider.containsKey(player.getUniqueId())) {
+            punishment.setReason(event.signedMessage().message());
+            punishmentManager.executeBan(player, punishment.getTarget(), punishment.getReason());
+        }
     }
 }

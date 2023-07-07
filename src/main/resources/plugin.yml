@@ -19,3 +19,6 @@ commands:
 
   reports:
     description: A Staff reports manager. Clear reports on a certain player or clear all reports.
+
+  punish:
+    description: Punish a member.

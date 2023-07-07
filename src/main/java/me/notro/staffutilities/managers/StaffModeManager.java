@@ -3,6 +3,7 @@ package me.notro.staffutilities.managers;
 import lombok.NonNull;
 import me.notro.staffutilities.StaffUtilities;
 import me.notro.staffutilities.utils.Message;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -23,22 +24,24 @@ public class StaffModeManager {
         this.staffModeList = configurationSection.getStringList("players");
     }
 
-    public void joinStaffMode(@NonNull Player player) {
-        staffModeList.add(player.getUniqueId().toString());
+    public void joinStaffMode(@NonNull Player staff) {
+        staffModeList.add(staff.getUniqueId().toString());
         configurationSection.set("players", staffModeList);
-        loadStaffTools(player);
+        loadStaffTools(staff);
+        Bukkit.broadcast(Message.getPrefix().append(Message.fixColor("&6" + staff.getName() + " &7joined staff mode.")), "staffutils.staff.notify");
         plugin.saveConfig();
     }
 
-    public void quitStaffMode(@NonNull Player player) {
-        staffModeList.remove(player.getUniqueId().toString());
+    public void quitStaffMode(@NonNull Player staff) {
+        staffModeList.remove(staff.getUniqueId().toString());
         configurationSection.set("players", staffModeList);
-        player.getInventory().clear();
+        staff.getInventory().clear();
+        Bukkit.broadcast(Message.getPrefix().append(Message.fixColor("&6" + staff.getName() + " &7quit staff mode.")), "staffutils.staff.notify");
         plugin.saveConfig();
     }
 
-    public boolean isInStaffMode(@NonNull Player player) {
-        return staffModeList.contains(player.getUniqueId().toString());
+    public boolean isInStaffMode(@NonNull Player staff) {
+        return staffModeList.contains(staff.getUniqueId().toString());
     }
 
     private void createStaffTool(@NonNull Player staff, @NonNull Material material, @NonNull String displayName, int index) {
@@ -57,6 +60,6 @@ public class StaffModeManager {
         createStaffTool(staff, Material.PAPER, "&9Reports", 3);
         createStaffTool(staff, Material.DIAMOND_HOE, "&bFreeze", 2);
         createStaffTool(staff, Material.ARROW, "&cVanish", 1);
-        createStaffTool(staff, Material.STONE_AXE, "&4Punish", 0);
+        createStaffTool(staff, Material.STONE_AXE, "&4Punishments", 0);
     }
 }

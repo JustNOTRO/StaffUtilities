@@ -21,30 +21,38 @@ public class VanishManager {
         this.vanishedPlayers = vanishSection.getStringList("vanished-players");
     }
 
-    public void joinVanish(@NonNull Player player) {
+    public void joinVanish(@NonNull Player staff) {
         Bukkit.getOnlinePlayers()
                 .stream()
-                .filter(players -> player.hasPermission("staffutils.vanish"))
-                .forEach(players -> players.hidePlayer(plugin, player));
-        vanishedPlayers.add(player.getUniqueId().toString());
-        vanishSection.set("players", vanishedPlayers );
-        plugin.saveConfig();
-        player.sendMessage(Message.getPrefix().append(Message.fixColor("&7You are now &aVanished&7.")));
-    }
+                .filter(players -> staff.hasPermission("staffutils.vanish"))
+                .forEach(players -> players.hidePlayer(plugin, staff));
 
-    public void quitVanish(@NonNull Player player) {
-        Bukkit.getOnlinePlayers()
-                .stream()
-                .filter(players -> player.hasPermission("staffutils.vanish"))
-                .forEach(players -> players.showPlayer(plugin, player));
-        vanishedPlayers.remove(player.getUniqueId().toString());
+        vanishedPlayers.add(staff.getUniqueId().toString());
         vanishSection.set("players", vanishedPlayers);
+
+        staff.setInvulnerable(true);
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7You are now &aVanished&7.")));
+        Bukkit.broadcast(Message.getPrefix().append(Message.fixColor("&6" + staff.getName() + " &7has &aEnabled &7vanish mode.")), "staffutils.staff.notify");
         plugin.saveConfig();
-        player.sendMessage(Message.getPrefix().append(Message.fixColor("&7You are now &cUnvanished&7.")));
     }
 
-    public boolean isVanished(@NonNull Player player) {
-        return vanishedPlayers.contains(player.getUniqueId().toString());
+    public void quitVanish(@NonNull Player staff) {
+        Bukkit.getOnlinePlayers()
+                .stream()
+                .filter(players -> staff.hasPermission("staffutils.vanish"))
+                .forEach(players -> players.showPlayer(plugin, staff));
+
+        vanishedPlayers.remove(staff.getUniqueId().toString());
+        vanishSection.set("players", vanishedPlayers);
+
+        staff.setInvulnerable(false);
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7You are now &cUnvanished&7.")));
+        Bukkit.broadcast(Message.getPrefix().append(Message.fixColor("&6" + staff.getName() + " &7has &cDisabled &7vanish mode.")), "staffutils.staff.notify");
+        plugin.saveConfig();
+    }
+
+    public boolean isVanished(@NonNull Player staff) {
+        return vanishedPlayers.contains(staff.getUniqueId().toString());
     }
 
     public boolean hasBypass(@NonNull Player player) {

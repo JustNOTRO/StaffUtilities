@@ -1,8 +1,8 @@
 package me.notro.staffutilities.commands;
 
-import me.notro.staffutilities.objects.Report;
 import me.notro.staffutilities.StaffUtilities;
 import me.notro.staffutilities.managers.GUIManager;
+import me.notro.staffutilities.objects.Punishment;
 import me.notro.staffutilities.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -14,10 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class ReportCommand implements CommandExecutor {
+public class PunishCommand implements CommandExecutor {
 
+
+    private final Punishment punishment = StaffUtilities.getInstance().getPunishment();
     private final GUIManager guiManager = StaffUtilities.getInstance().getGuiManager();
-    private final Report report = StaffUtilities.getInstance().getReport();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -27,25 +28,23 @@ public class ReportCommand implements CommandExecutor {
             return false;
         }
 
+        if (!player.hasPermission("staffutils.punishments.use")) {
+            player.sendMessage(Message.NO_PERMISSION);
+            return false;
+        }
+
         if (args.length < 1) {
-            player.sendMessage(Message.getPrefix().append(Message.fixColor("&c/&7" + label + " &c<&7player&c>")));
+            player.sendMessage(Message.fixColor("&c/&7" + label + "&c<&7player&c>"));
             return false;
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        report.setTarget(target);
-        report.setReporter(player);
+        punishment.setTarget(target);
+        punishment.setRequester(player);
 
-        if (!target.hasPlayedBefore()) {
-            player.sendMessage(Message.fixColor("&6" + target.getName() + " &cnever played this server before&7."));
-            return false;
-        }
-
-        guiManager.createMenu(player, 9, Message.fixColor("&9Choose Reason"));
-        guiManager.setMenuItem(3, new ItemStack(Material.NAME_TAG), "&eChat related");
-        guiManager.setMenuItem(4, new ItemStack(Material.PAPER),"&cPersona related");
-        guiManager.setMenuItem(5, new ItemStack(Material.LEAD),"&4Client/Server related");
-        guiManager.setMenuItem(8, new ItemStack(Material.ANVIL),"&cOther");
+        guiManager.createMenu(player, 9, Message.fixColor("&4Punish &6" + target.getName()));
+        guiManager.setMenuItem(0, new ItemStack(Material.LIME_CONCRETE), "&aConfirm");
+        guiManager.setMenuItem(8, new ItemStack(Material.RED_CONCRETE), "&cDeny");
 
         player.openInventory(guiManager.getInventory());
         return true;

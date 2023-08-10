@@ -1,7 +1,6 @@
 package me.notro.staffutilities.listeners;
 
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.StaffModeManager;
 import me.notro.staffutilities.utils.Message;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
@@ -11,13 +10,18 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlayerFlightListener implements Listener {
-    private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
+
+    private final StaffUtilities plugin;
+
+    public PlayerFlightListener(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerFlight(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!plugin.getStaffModeManager().isInStaffMode(player)) return;
         if (!event.hasItem()) return;
         if (event.getItem() == null) return;
         if (!event.getItem().hasItemMeta()) return;

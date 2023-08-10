@@ -1,8 +1,6 @@
 package me.notro.staffutilities.commands;
 
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.GUIManager;
-import me.notro.staffutilities.objects.Punishment;
 import me.notro.staffutilities.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,8 +15,11 @@ import org.jetbrains.annotations.NotNull;
 public class PunishCommand implements CommandExecutor {
 
 
-    private final Punishment punishment = StaffUtilities.getInstance().getPunishment();
-    private final GUIManager guiManager = StaffUtilities.getInstance().getGuiManager();
+    private final StaffUtilities plugin;
+
+    public PunishCommand(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -39,14 +40,15 @@ public class PunishCommand implements CommandExecutor {
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        punishment.setTarget(target);
-        punishment.setRequester(player);
+        plugin.getPunishment().setTarget(target);
+        plugin.getPunishment().setRequester(player);
 
-        guiManager.createMenu(player, 9, Message.fixColor("&4Punish &6" + target.getName()));
-        guiManager.setMenuItem(0, new ItemStack(Material.LIME_CONCRETE), "&aConfirm");
-        guiManager.setMenuItem(8, new ItemStack(Material.RED_CONCRETE), "&cDeny");
+        plugin.getGuiManager().createMenu(player, 9, Message.fixColor("&4Choose &6Punishment"));
+        plugin.getGuiManager().setMenuItem(4, new ItemStack(Material.WOODEN_AXE), "&cBan");
+        plugin.getGuiManager().setMenuItem(5, new ItemStack(Material.NAME_TAG), "&eMute");
+        plugin.getGuiManager().setMenuItem(8, new ItemStack(Material.RED_CONCRETE), "&cCancel");
 
-        player.openInventory(guiManager.getInventory());
+        player.openInventory(plugin.getGuiManager().getInventory());
         return true;
     }
 }

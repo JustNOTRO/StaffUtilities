@@ -1,29 +1,25 @@
 package me.notro.staffutilities.managers;
 
 import lombok.NonNull;
-import me.notro.staffutilities.CustomConfig;
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.objects.Punishment;
 import me.notro.staffutilities.utils.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-
-import java.util.HashMap;
-import java.util.UUID;
 
 public class PunishmentManager {
 
-    private final CustomConfig staffUtilsFile = StaffUtilities.getInstance().getStaffUtilsConfig();
-    private final HashMap<UUID, Punishment> reasonProvider = StaffUtilities.getInstance().getReasonProvider();
-    private final Punishment punishment = StaffUtilities.getInstance().getPunishment();
+    private final StaffUtilities plugin;
 
-    public void executeBan(@NonNull Player staff, @NonNull OfflinePlayer target, @NonNull String reason) {
-        reasonProvider.put(target.getUniqueId(), punishment);
+    public PunishmentManager(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
-        staffUtilsFile.get().set("punishments-system." + target.getName() + ".reason", reason);
-        staffUtilsFile.get().set("punishments-system." + target.getName() + ".uuid", target.getUniqueId().toString());
-        staffUtilsFile.save();
+    public void executeBan(@NonNull Player staff, OfflinePlayer target, @NonNull String reason) {
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".reason", reason);
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".punishment", "Ban");
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".uuid", target.getUniqueId().toString());
+        plugin.getStaffUtilsConfig().save();
 
         if (target.isOnline()) {
             Player onlineTarget = target.getPlayer();
@@ -36,38 +32,62 @@ public class PunishmentManager {
             onlineTarget.kick(Message.fixColor("&cYou have been banned for the reason &6" + reason + "&7."));
         }
 
-        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully banned &6" + target.getName() + "&7.")));
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully banned &6" + target.getName() + " &7for " + reason + "&7.")));
     }
 
-    public void executeUnban(@NonNull Player staff, @NonNull OfflinePlayer target) {
-        reasonProvider.remove(target.getUniqueId());
+    public void executeUnban(@NonNull Player staff, OfflinePlayer target) {
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName(), null);
+        plugin.getStaffUtilsConfig().save();
 
-        staffUtilsFile.get().set("punishments-system." + target.getName(), null);
-        staffUtilsFile.save();
-
-        staff.sendMessage(Message.fixColor("&7Successfully unbanned &6" + target.getName() + "&7."));
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully unbanned &6" + target.getName() + "&7.")));
     }
 
-    public boolean isBanned(@NonNull Player staff, @NonNull OfflinePlayer target) {
-        if (staffUtilsFile.get().getConfigurationSection("punishments-system") == null) {
-            staff.sendMessage(Message.getPrefix().append(Message.fixColor("&cNo players are currently punished&7.")));
-            staff.closeInventory();
-            return false;
-        }
+    public boolean isBanned(OfflinePlayer target) {
+        ConfigurationSection banSection = plugin.getStaffUtilsConfig().get().getConfigurationSection("punishments-system." + target.getName());
+        if (banSection == null || !banSection.getString("punishment").equalsIgnoreCase("Ban")) return false;
 
-        for (String key : staffUtilsFile.get().getConfigurationSection("punishments-system").getKeys(false))
+        for (String key : plugin.getStaffUtilsConfig().get().getConfigurationSection("punishments-system").getKeys(false)) {
+            if (!key.equalsIgnoreCase(target.getName())) continue;
+
             return key.equalsIgnoreCase(target.getName());
+        }
 
         return false;
     }
 
-    public boolean hasBypass(@NonNull OfflinePlayer target) {
-        if (target.isOnline()) {
-            Player onlineTarget = target.getPlayer();
-            if (onlineTarget == null) return false;
+    public void executeMute(@NonNull Player staff, OfflinePlayer target, @NonNull String reason) {
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".punishment", "Mute");
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".reason", reason);
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName() + ".uuid", target.getUniqueId().toString());
+        plugin.getStaffUtilsConfig().save();
 
-           return onlineTarget.hasPermission("staffutils.punishments.bypass");
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully muted &6" + target.getName() + " &7for " + reason + "&7.")));
+    }
+
+    public void executeUnmute(@NonNull Player staff, OfflinePlayer target) {
+        plugin.getStaffUtilsConfig().get().set("punishments-system." + target.getName(), null);
+        plugin.getStaffUtilsConfig().save();
+
+        staff.sendMessage(Message.getPrefix().append(Message.fixColor("&7Successfully unmuted &6" + target.getName() + "&7.")));
+    }
+
+    public boolean isMuted(OfflinePlayer target) {
+        ConfigurationSection muteSection = plugin.getStaffUtilsConfig().get().getConfigurationSection("punishments-system." + target.getName());
+        if (muteSection == null || !muteSection.getString("punishment").equalsIgnoreCase("Mute")) return false;
+
+        for (String key : plugin.getStaffUtilsConfig().get().getConfigurationSection("punishments-system").getKeys(false)) {
+            if (!key.equalsIgnoreCase(target.getName())) continue;
+
+            return key.equalsIgnoreCase(target.getName());
         }
+
         return false;
+    }
+
+    public boolean hasBypass(OfflinePlayer target) {
+        Player onlineTarget = target.getPlayer();
+        if (onlineTarget == null) return false;
+
+       return onlineTarget.hasPermission("staffutils.punishments.bypass");
     }
 }

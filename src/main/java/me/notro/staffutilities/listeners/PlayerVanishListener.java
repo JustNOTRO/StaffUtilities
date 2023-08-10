@@ -1,8 +1,6 @@
 package me.notro.staffutilities.listeners;
 
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.StaffModeManager;
-import me.notro.staffutilities.managers.VanishManager;
 import me.notro.staffutilities.utils.Message;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -14,14 +12,17 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlayerVanishListener implements Listener {
 
-    private final VanishManager vanishManager = StaffUtilities.getInstance().getVanishManager();
-    private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
+    private final StaffUtilities plugin;
+
+    public PlayerVanishListener(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerVanish(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!plugin.getStaffModeManager().isInStaffMode(player)) return;
         if (!event.hasItem()) return;
         if (event.getItem() == null) return;
         if (!event.getItem().hasItemMeta()) return;
@@ -33,18 +34,18 @@ public class PlayerVanishListener implements Listener {
         if (!itemName.equals(Message.fixColor("&cVanish"))) return;
         if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
-        if (!vanishManager.isVanished(player)) {
-            vanishManager.joinVanish(player);
+        if (!plugin.getVanishManager().isVanished(player)) {
+            plugin.getVanishManager().joinVanish(player);
             Bukkit.broadcast(Message.fixColor("&e" + player.getName() + " left the game"));
             return;
         }
 
-        vanishManager.quitVanish(player);
+        plugin.getVanishManager().quitVanish(player);
         Bukkit.broadcast(Message.fixColor("&e" + player.getName() + " joined the game"));
 
         Bukkit.getOnlinePlayers()
                 .stream()
-                .filter(vanishManager::hasBypass)
+                .filter(plugin.getVanishManager()::hasBypass)
                 .forEach(players -> players.showPlayer(StaffUtilities.getInstance(), player));
     }
 }

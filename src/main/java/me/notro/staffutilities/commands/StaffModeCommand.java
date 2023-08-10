@@ -1,7 +1,6 @@
 package me.notro.staffutilities.commands;
 
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.StaffModeManager;
 import me.notro.staffutilities.utils.Message;
 import me.notro.staffutilities.utils.Sounds;
 import org.bukkit.Sound;
@@ -13,7 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class StaffModeCommand implements CommandExecutor {
 
-    private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
+    private final StaffUtilities plugin;
+
+    public StaffModeCommand(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -33,14 +36,14 @@ public class StaffModeCommand implements CommandExecutor {
             return false;
         }
 
-        if (!staffModeManager.isInStaffMode(player)) {
-            staffModeManager.joinStaffMode(player);
+        if (!plugin.getStaffModeManager().isInStaffMode(player)) {
+            plugin.getStaffModeManager().joinStaffMode(player);
             player.sendMessage(Message.getPrefix().append(Message.fixColor("&aYou have enabled staff mode&7.")));
             Sounds.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
             return true;
         }
 
-        staffModeManager.quitStaffMode(player);
+        plugin.getStaffModeManager().quitStaffMode(player);
         player.sendMessage(Message.getPrefix().append(Message.fixColor("&cYou have disabled staff mode&7.")));
         Sounds.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
         return true;

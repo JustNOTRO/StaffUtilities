@@ -9,71 +9,38 @@ import me.notro.staffutilities.objects.Report;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
-import java.util.UUID;
 
+@Getter
 public final class StaffUtilities extends JavaPlugin {
 
     @Getter
     private static StaffUtilities instance;
 
-    @Getter
     private StaffModeManager staffModeManager;
-
-    @Getter
     private GUIManager guiManager;
-
-    @Getter
     private VanishManager vanishManager;
-
-    @Getter
     private FreezeManager freezeManager;
-
-    @Getter
     private PunishmentManager punishmentManager;
-
-    @Getter
     private ReportManager reportManager;
-
-    @Getter
+    private CPSManager cpsManager;
     private Report report;
-
-    @Getter
     private Punishment punishment;
-
-    @Getter
-    private HashMap<UUID, Punishment> reasonProvider;
-
-    @Getter
     private CustomConfig staffUtilsConfig;
 
     @Override
     public void onEnable() {
         instance = this;
-        staffUtilsConfig = new CustomConfig(instance, "staffutils");
+        staffUtilsConfig = new CustomConfig(this, "staffutils");
 
         loadManagers();
         loadObjects();
+        loadCommands();
+        loadListeners();
         getConfig().options().copyDefaults();
         saveDefaultConfig();
 
         getLogger().info("has been enabled.");
-
-        getCommand("staffmode").setExecutor(new StaffModeCommand());
-        getCommand("staffchat").setExecutor(new StaffChatCommand());
-        getCommand("report").setExecutor(new ReportCommand());
-        getCommand("reports").setExecutor(new ReportsCommand());
-        getCommand("punish").setExecutor(new PunishCommand());
-
-        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerMoveListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
-        getServer().getPluginManager().registerEvents(new AsyncChatListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerReportListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerFreezeListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerFlightListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerPunishListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerVanishListener(), this);
-        }
+    }
 
     @Override
     public void onDisable() {
@@ -81,17 +48,39 @@ public final class StaffUtilities extends JavaPlugin {
     }
 
     private void loadManagers() {
-        staffModeManager = new StaffModeManager();
+        staffModeManager = new StaffModeManager(this);
         guiManager = new GUIManager();
-        vanishManager = new VanishManager();
-        freezeManager = new FreezeManager();
-        punishmentManager = new PunishmentManager();
-        reportManager = new ReportManager();
+        vanishManager = new VanishManager(this);
+        freezeManager = new FreezeManager(this);
+        punishmentManager = new PunishmentManager(this);
+        reportManager = new ReportManager(this);
+        cpsManager = new CPSManager(new HashMap<>());
     }
 
     private void loadObjects() {
         report = new Report();
-        reasonProvider = new HashMap<>();
         punishment = new Punishment();
+    }
+
+    private void loadCommands() {
+        getCommand("staffmode").setExecutor(new StaffModeCommand(this));
+        getCommand("staffchat").setExecutor(new StaffChatCommand());
+        getCommand("report").setExecutor(new ReportCommand(this));
+        getCommand("reports").setExecutor(new ReportsCommand(this));
+        getCommand("punish").setExecutor(new PunishCommand(this));
+    }
+
+    private void loadListeners() {
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(this), this)   ;
+        getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new AsyncChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerReportListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerFreezeListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerFlightListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerPunishListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerVanishListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerCPSListener(this), this);
+        getServer().getPluginManager().registerEvents(new AsyncPlayerPreLoginListener(this), this);
     }
 }

@@ -1,9 +1,6 @@
 package me.notro.staffutilities.listeners;
 
 import me.notro.staffutilities.StaffUtilities;
-import me.notro.staffutilities.managers.FreezeManager;
-import me.notro.staffutilities.managers.GUIManager;
-import me.notro.staffutilities.managers.StaffModeManager;
 import me.notro.staffutilities.utils.Message;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -20,28 +17,29 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 public class PlayerFreezeListener implements Listener {
 
-    private final FreezeManager freezeManager = StaffUtilities.getInstance().getFreezeManager();
-    private final StaffModeManager staffModeManager = StaffUtilities.getInstance().getStaffModeManager();
-    private final GUIManager guiManager = StaffUtilities.getInstance().getGuiManager();
+    private final StaffUtilities plugin;
     private Player whoToFreeze;
+
+    public PlayerFreezeListener(StaffUtilities plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerFreeze(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (!staffModeManager.isInStaffMode(player)) return;
+        if (!plugin.getStaffModeManager().isInStaffMode(player)) return;
         if (!event.hasItem()) return;
         if (event.getItem() == null) return;
         if (!event.getItem().hasItemMeta()) return;
         if (event.getItem().getItemMeta() == null) return;
         if (!event.getItem().getItemMeta().hasDisplayName()) return;
 
-        guiManager.createMenu(player, 27, Message.fixColor("&bFreeze"));
+        plugin.getGuiManager().createMenu(player, 36, Message.fixColor("&bFreeze"));
         Component itemName = event.getItem().getItemMeta().displayName();
 
         if (!itemName.equals(Message.fixColor("&bFreeze"))) return;
-        if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
-            return;
+        if (!event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
         ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
@@ -51,10 +49,10 @@ public class PlayerFreezeListener implements Listener {
             skullMeta.displayName(onlinePlayer.displayName());
 
             itemStack.setItemMeta(skullMeta);
-            guiManager.addMenuItem(itemStack);
+            plugin.getGuiManager().addMenuItem(itemStack);
         }
 
-        player.openInventory(guiManager.getInventory());
+        player.openInventory(plugin.getGuiManager().getInventory());
     }
 
     @EventHandler
@@ -69,42 +67,40 @@ public class PlayerFreezeListener implements Listener {
         whoToFreeze = event.getWhoClicked().getServer().getPlayerExact(LegacyComponentSerializer.legacySection().serialize(slot.hasItemMeta() ? slot.getItemMeta().displayName() : slot.displayName()));
 
         if (whoToFreeze == null) {
-            player.sendMessage(Message.NO_PLAYER_EXISTENCE);
+            player.sendMessage(Message.getPrefix().append(Message.NO_PLAYER_EXISTENCE));
             return;
         }
 
-        guiManager.createMenu(player, 9, Message.fixColor("&bFreeze &6" + whoToFreeze.getName()));
-        guiManager.setMenuItem(0, new ItemStack(Material.GREEN_WOOL), "&aConfirm");
-        guiManager.setMenuItem(8, new ItemStack(Material.RED_WOOL), "&cDeny");
+        plugin.getGuiManager().createMenu(player, 9, Message.fixColor("&aConfirm &bFreeze"));
+        plugin.getGuiManager().setMenuItem(0, new ItemStack(Material.GREEN_WOOL), "&aConfirm");
+        plugin.getGuiManager().setMenuItem(8, new ItemStack(Material.RED_WOOL), "&cDeny");
 
-        player.openInventory(guiManager.getInventory());
-
-        if (!event.getView().title().equals(Message.fixColor("&bFreeze &6" + whoToFreeze.getName()))) return;
+        player.openInventory(plugin.getGuiManager().getInventory());
     }
 
     @EventHandler
     public void onFreezeConfirmation(InventoryClickEvent event) {
         Player player = (Player) event.getView().getPlayer();
-        ItemStack secondSlot = event.getInventory().getItem(event.getSlot());
+        ItemStack slot = event.getInventory().getItem(event.getSlot());
 
-        if (secondSlot == null) return;
-        if (!secondSlot.getItemMeta().hasDisplayName()) return;
+        if (slot == null) return;
+        if (!event.getView().title().equals(Message.fixColor("&aConfirm &bFreeze"))) return;
 
-        switch (secondSlot.getType()) {
+        switch (slot.getType()) {
             case GREEN_WOOL -> {
-                if (freezeManager.hasBypass(whoToFreeze)) {
+                if (plugin.getFreezeManager().hasBypass(whoToFreeze)) {
                     player.sendMessage(Message.getPrefix().append(Message.fixColor("&6" + whoToFreeze.getName() + " &ccannot be freezed silly&7!")));
                     player.closeInventory();
                     return;
                 }
 
-                if (!freezeManager.isFrozen(whoToFreeze)) {
-                    freezeManager.executeFreeze(player, whoToFreeze);
+                if (!plugin.getFreezeManager().isFrozen(whoToFreeze)) {
+                    plugin.getFreezeManager().executeFreeze(player, whoToFreeze);
                     player.closeInventory();
                     return;
                 }
 
-                freezeManager.executeUnfreeze(player, whoToFreeze);
+                plugin.getFreezeManager().executeUnfreeze(player, whoToFreeze);
                 player.closeInventory();
             }
 
